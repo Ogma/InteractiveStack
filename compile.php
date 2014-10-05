@@ -48,10 +48,7 @@ function get_compile_command($flags) {
  */
 function compile($code, $flags){
   sanitize_c($code);
-  create_file($flags['file']);
-  $file_process = fopen($flags['file'], 'w') or die('Unable to open file!');
-  fwrite($file_process, $code);
-  fclose($file_process);
+  write_code_to_file($code, $flags);
   $compile_string = get_compile_command($flags);
   return run_command($compile_string . ' 2>&1');
 }
@@ -61,6 +58,13 @@ function compile($code, $flags){
  */
 function sanitize_c($code) {
   return $code;
+}
+
+function write_code_to_file($code, $flags) {
+  create_file($flags['file']);
+  $file_process = fopen($flags['file'], 'w') or die('Unable to open file!');
+  fwrite($file_process, $code);
+  fclose($file_process);
 }
 
 /**
