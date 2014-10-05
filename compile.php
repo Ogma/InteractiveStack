@@ -1,6 +1,7 @@
 <?php
 /**
  * @file PHP script to compile and dump a c file
+ * http://pastebin.com/EsPXgDUk
  */
 
 $flags = array(
