@@ -4,24 +4,34 @@
  * http://pastebin.com/EsPXgDUk
  */
 
-$flags = array(
-  'file' => full_file_path() . 'whateverBAH2.c',
-  'flags' => array(
-    'm32',
-    'g',
-    'o' => array(
-      full_file_path() . 'whatever2',
-    ),
-  ),
-);
-echo compile("#include <stdio.h>
-
+echo process("#include <stdio.h>
+// hax
+// <script>alert('test');</script>
 int main()
 {
-    printf(\"Hello pain\");
+    printf(\"Hello pain\\n\");
     return 0;
 
-}", $flags);
+}");
+
+function build_flags() {
+  $name = salted_md5(time() . rand());
+  return array(
+    'file' => full_file_path() . $name . '.c',
+    'output' => full_file_path() . $name,
+    'flags' => array(
+      'm32',
+      'g',
+      'o' => array(
+        full_file_path() . $name,
+      ),
+    ),
+  );
+}
+
+function salted_md5($string, $salt = '__S@l713$--') {
+  return md5($string . $salt);
+}
 
 /**
  * creates string for the compiler
@@ -46,25 +56,54 @@ function get_compile_command($flags) {
  *  $code long of C code.
  *  $flags array of flags and settings.
  */
-function compile($code, $flags){
-  sanitize_c($code);
+function compile($code, $flags = NULL){
+  if ($flags == NULL) {
+    $flags = build_flags();
+  }
   write_code_to_file($code, $flags);
   $compile_string = get_compile_command($flags);
-  return run_command($compile_string . ' 2>&1');
+  return array(
+    'output' => run_command($compile_string . ' 2>&1'),
+    'flags' => $flags,
+    'filename' => $flags['file'],
+    'output_file' => $flags['output'],
+  );
+}
+
+function process($code) {
+  echo 'compiling';
+  // Should we save to the DB?
+  $compile_results = compile($code);
+  if ($compile_results['output'] != NULL
+    || !file_exists($compile_results['output_file'])) {
+    return 'ERROR';
+  }
+  echo 'compile successful';
+  ?><pre><?php
+  echo readfile($compile_results['filename'] . '.safe');
+  ?></pre><?php
 }
 
 /**
  * @TODO
  */
-function sanitize_c($code) {
+function sanitize_c(&$code) {
+  $code = htmlentities($code);
   return $code;
 }
 
 function write_code_to_file($code, $flags) {
-  create_file($flags['file']);
-  $file_process = fopen($flags['file'], 'w') or die('Unable to open file!');
-  fwrite($file_process, $code);
-  fclose($file_process);
+  write_to_file($flags['file'], $code);
+  $safe = $flags['file'] . '.safe';
+  sanitize_c($code);
+  write_to_file($safe, $code);
+}
+
+function write_to_file($file, $string) {
+  create_file($file);
+  $file_process = fopen($file, 'w') or die('Unable to open file!');
+  fwrite($file_process, $string);
+  fclose($file_process); 
 }
 
 /**
