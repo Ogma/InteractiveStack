@@ -47,13 +47,28 @@ function get_compile_command($flags) {
  *  $flags array of flags and settings.
  */
 function compile($code, $flags){
+  sanitize_c($code);
   create_file($flags['file']);
   $file_process = fopen($flags['file'], 'w') or die('Unable to open file!');
   fwrite($file_process, $code);
   fclose($file_process);
   $compile_string = get_compile_command($flags);
+  return run_command($compile_string . ' 2>&1');
+}
+
+/**
+ * @TODO
+ */
+function sanitize_c($code) {
+  return $code;
+}
+
+/**
+ * shell_exec wrapper to fix the env.
+ */
+function run_command($command) {
   putenv('PATH="/usr/sbin:/usr/bin:/sbin"');
-  return shell_exec($compile_string . ' 2>&1');
+  shell_exec($command);
 }
 
 /**
@@ -70,7 +85,7 @@ function create_file($filename) {
  * should be uploaded and compiled.
  */
 function full_file_path() {
-  return '/var/www/html/interactivestack/tmp/';
+  return 'tmp/';
 }
 
 /**
