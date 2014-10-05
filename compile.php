@@ -13,16 +13,14 @@ $flags = array(
     ),
   ),
 );
-
 echo compile("#include <stdio.h>
 
 int main()
 {
-    printf(\"Hello Wasdorld\");
+    printf(\"Hello pain\");
     return 0;
 
 }", $flags);
-
 
 /**
  * creates string for the compiler
@@ -53,8 +51,8 @@ function compile($code, $flags){
   fwrite($file_process, $code);
   fclose($file_process);
   $compile_string = get_compile_command($flags);
-  echo $compile_string;
-  return shell_exec($compile_string);
+  putenv('PATH="/usr/sbin:/usr/bin:/sbin"');
+  return shell_exec($compile_string . ' 2>&1');
 }
 
 /**
@@ -71,7 +69,7 @@ function create_file($filename) {
  * should be uploaded and compiled.
  */
 function full_file_path() {
-  return 'tmp/';
+  return '/var/www/html/interactivestack/tmp/';
 }
 
 /**
