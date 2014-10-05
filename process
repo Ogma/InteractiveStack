@@ -1,0 +1,23 @@
+#!/bin/bash
+VAR=`cat dump | grep -Eo "[0-9]{1,}\s{1,}0x[0-9a-f]{7}\$" | sed 's/[ ]\{1,\}/:/'`
+declare -A DATA
+N=0
+for i in ${VAR};
+do
+  DATA[$N]=${i}
+  ((N++))
+done;
+echo "{"
+for i in "${!DATA[@]}"
+do
+  NEXTKEY=`expr ${i} + 1`
+  LINE=`echo ${DATA[$i]} | grep -Eo "^[0-9]{1,}" | sed 's/ *//g'`
+  POSITION=`echo ${DATA[$i]} | grep -Eo "0x[0-9a-f]{7}$" | sed 's/ *//g'`
+  NEXTPOSITION=`echo ${DATA[$NEXTKEY]} | grep -Eo "0x[0-9a-f]{7}$" | sed 's/ *//g'`
+  echo '  '${i}": {"
+  echo '    "line": '${LINE}','
+  echo '    "lower": "'${POSITION}'",'
+  echo '    "upper": "'${NEXTPOSITION}'",'
+  echo "  },"
+done;
+echo "}"
