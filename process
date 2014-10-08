@@ -1,5 +1,11 @@
 #!/bin/bash
-VAR=`cat dump | grep -Eo "[0-9]{1,}\s{1,}0x[0-9a-f]{7}\$" | sed 's/[ ]\{1,\}/:/'`
+
+if read -t 0; then
+  VAR=`cat | grep -Eo "[0-9]{1,}\s{1,}0x[0-9a-f]{7}\$" | sed 's/[ ]\{1,\}/:/'`
+else
+  VAR=`echo "$*" | grep -Eo "[0-9]{1,}\s{1,}0x[0-9a-f]{7}\$" | sed 's/[ ]\{1,\}/:/'`
+
+fi
 declare -A DATA
 N=0
 for i in ${VAR};

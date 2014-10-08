@@ -22,6 +22,7 @@ function build_flags() {
     'file' => full_file_path($folder) . $name . '.c',
     'output' => full_file_path($folder) . $name,
     'folder' => full_file_path($folder),
+    'name' => $name,
     'flags' => array(
       'm32',
       'g',
@@ -74,18 +75,23 @@ function compile($code, $flags = NULL){
 }
 
 function process($code) {
-  echo 'compiling';
+  echo 'compiling<br>';
   // Should we save to the DB?
   $compile_results = compile($code);
   if ($compile_results['output'] != NULL
     || !file_exists($compile_results['output_file'])) {
     return 'ERROR';
   }
-  echo 'compile successful';
+  echo 'compiled <b>' . $compile_results['flags']['name'] . '</b> successfully<br>';
   ?><pre><?php
   echo readfile($compile_results['filename'] . '.safe');
   ?></pre><?php
   get_stacks($compile_results['flags']['output'], $compile_results['flags']['folder']);
+  process_lines($compile_results['flags']['folder']);
+  echo 'Data dumped and lines parsed<br>';
+  ?><pre><?php
+  echo readfile($compile_results['flags']['folder'] . 'lines.json');
+  ?></pre><?php
 }
 
 /**
@@ -110,19 +116,24 @@ function write_to_file($file, $string) {
   fclose($file_process); 
 }
 
+
+function process_lines($folder) {
+  return run_command('cat ' . $folder . 'lines | ./process > ' . $folder . 'lines.json');
+}
+
 function get_stacks($binary_path, $output_path) {
   $command = 'objdump -D -M intel ' . $binary_path . ' > ' . $output_path . 'stack';
-  echo run_command($command);
+  run_command($command);
   $command = 'objdump --dwarf=decodedline ' . $binary_path . ' > ' . $output_path . 'lines';
-  echo run_command($command);
+  run_command($command);
 }
 
 /**
  * shell_exec wrapper to fix the env.
  */
 function run_command($command) {
-  putenv('PATH="/usr/sbin:/usr/bin:/sbin"');
-  //putenv('PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"');
+  //putenv('PATH="/usr/sbin:/usr/bin:/sbin"');
+  putenv('PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games"');
   return shell_exec($command);
 }
 
