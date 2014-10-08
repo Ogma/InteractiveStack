@@ -16,14 +16,17 @@ int main()
 
 function build_flags() {
   $name = salted_md5(time() . rand());
+  $folder = $name . '/';
+  mkdir(full_file_path($folder), 0777);
   return array(
-    'file' => full_file_path() . $name . '.c',
-    'output' => full_file_path() . $name,
+    'file' => full_file_path($folder) . $name . '.c',
+    'output' => full_file_path($folder) . $name,
+    'folder' => full_file_path($folder),
     'flags' => array(
       'm32',
       'g',
       'o' => array(
-        full_file_path() . $name,
+        full_file_path($folder) . $name,
       ),
     ),
   );
@@ -82,6 +85,7 @@ function process($code) {
   ?><pre><?php
   echo readfile($compile_results['filename'] . '.safe');
   ?></pre><?php
+  get_stacks($compile_results['flags']['output'], $compile_results['flags']['folder']);
 }
 
 /**
@@ -106,12 +110,20 @@ function write_to_file($file, $string) {
   fclose($file_process); 
 }
 
+function get_stacks($binary_path, $output_path) {
+  $command = 'objdump -D -M intel ' . $binary_path . ' > ' . $output_path . 'stack';
+  echo run_command($command);
+  $command = 'objdump --dwarf=decodedline ' . $binary_path . ' > ' . $output_path . 'lines';
+  echo run_command($command);
+}
+
 /**
  * shell_exec wrapper to fix the env.
  */
 function run_command($command) {
   putenv('PATH="/usr/sbin:/usr/bin:/sbin"');
-  shell_exec($command);
+  //putenv('PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"');
+  return shell_exec($command);
 }
 
 /**
@@ -127,8 +139,8 @@ function create_file($filename) {
  * Full folder path of where files
  * should be uploaded and compiled.
  */
-function full_file_path() {
-  return 'tmp/';
+function full_file_path($folder = '') {
+  return 'tmp/' . $folder;
 }
 
 /**
