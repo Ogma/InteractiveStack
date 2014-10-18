@@ -1,3 +1,4 @@
+<script src="asm.js"></script>
 <?php
 /**
  * @file PHP script to compile and dump a c file
@@ -9,7 +10,7 @@ echo process("#include <stdio.h>
 // <script>alert('test');</script>
 int main()
 {
-    printf(\"Hello pain\\n\");
+    printf(\"Hello world\\n\");
     return 0;
 
 }");
@@ -20,14 +21,14 @@ function build_flags() {
   mkdir(full_file_path($folder), 0777);
   return array(
     'file' => full_file_path($folder) . $name . '.c',
-    'output' => full_file_path($folder) . $name,
+    'output' => full_file_path($folder) . $name . '.elf',
     'folder' => full_file_path($folder),
     'name' => $name,
     'flags' => array(
       'm32',
       'g',
       'o' => array(
-        full_file_path($folder) . $name,
+        full_file_path($folder) . $name . '.elf',
       ),
     ),
   );
@@ -122,7 +123,7 @@ function process_lines($folder) {
 }
 
 function get_stacks($binary_path, $output_path) {
-  $command = 'objdump -D -M intel ' . $binary_path . ' > ' . $output_path . 'stack';
+  $command = 'objdump -D -M intel ' . $binary_path . ' > ' . $output_path . 'memory';
   run_command($command);
   $command = 'objdump --dwarf=decodedline ' . $binary_path . ' > ' . $output_path . 'lines';
   run_command($command);
