@@ -159,7 +159,7 @@ hook.register('add', function(minuend, subtrahend) {
   }
 });
 
-hook.register('call', function(data, moveAddr) {
+hook.register('call', function(data) {
   switch (dataType(data)) {
     case 'stack':
       globals['register']['eip'] = data;

@@ -3,19 +3,39 @@ var InstructionAddress = {
     'func' : 'sub',
     'args' : ['0xdeadbeef', 1],
   },
-  '0xHA' : [],
-  '0x01' : [],
+  '0x00000001' : {
+    'func' : 'call',
+    'args' : ['0x00000003'],
+  },
+  '0x00000002' : {
+    'func' : 'sub',
+    'args' : ['0xdeadbeef', 1],
+  },
+  '0x00000003' : {
+    'func' : 'add',
+    'args' : ['0xdeadbeef', 1],
+  },
+  '0x00000004' : {
+    'func' : 'call',
+    'args' : ['0x00000002'],
+  },
 };
 var InstructionList = [];
 for (var memory in InstructionAddress) {
-  console.log(InstructionAddress[memory]);
+  InstructionAddress[memory];
 }
 
 function callInstruction(address) {
+  console.log(address, 'called address');
+  console.log(InstructionAddress[address].func, 'called func');
   var insArgs = InstructionAddress[address].args;
   insArgs.unshift(InstructionAddress[address].func);
-  hook.call.apply(this, insArgs);
+  hook.call.apply(0, insArgs);
+  insArgs.shift();
   UpdateInstructionList(address);
+  if (InstructionAddress[address].func != 'call') {
+    globals.register.eip = getNextInstruction(globals.register.eip);
+  }
 }
 
 function UpdateInstructionList(address) {
@@ -25,7 +45,23 @@ function UpdateInstructionList(address) {
   });
 }
 
-console.log(globals.stack);
-callInstruction('0x00');
-console.log(globals.stack);
-console.log(InstructionList);
+function init() {
+  for (first in InstructionAddress) break;
+  globals.register.eip = first;
+  nextStep();
+}
+
+function getNextInstruction(pos) {
+  next = false;
+  for (item in InstructionAddress) {
+    if (next) { break; }
+    next = (item == pos ? true : false);
+  }
+  return item;
+}
+
+function nextStep() {
+  console.log(globals.register.eip, 'current eip');
+  callInstruction(globals.register.eip);
+}
+init();
