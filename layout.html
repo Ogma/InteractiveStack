@@ -1,0 +1,216 @@
+<html>
+	<head>
+		<title> Interactive Stack </title>
+		<style type="text/css">
+            body{
+                margin:0px;
+                padding:0px;
+                background:#333;
+            }
+            #container{
+				background:#333;
+                width:1280px;
+               /* width:95%; */
+				height:800px;
+				margin:0px;
+				padding:30px;
+			}
+			
+			#left{
+				border:solid 2px #666;
+				height:800px;
+				width:850px;
+				float:left;
+			}
+			#titlebox{ width:850px; height:100px; }
+			#titlebox h1{color:#3399ff; font-family:sans;font-size: 33pt; margin-left: 20px; font-style: italic;}
+			#c_src{
+				width:370px;
+				height:auto;
+				float:left;
+				background:#ccc;
+			}
+			#asm_src{
+				width:370px;
+				height:auto;
+				float:right;
+				background:#ccc;
+            }
+            #code {
+                overflow-y:scroll;
+                height:500px;
+            }
+			#infobox{
+				width:850px; height:137px;
+				clear:both;
+				background:#777;
+				margin-top:10px;
+				position: relative;
+				bottom: -24px;
+			}
+			#infobox #comment{
+					background:#002E63;
+					width:810px;
+					height:100px;
+					margin-left:auto;
+					margin-right:auto;
+					position:relative; top:10px;
+					border:solid 1px #ccc;
+					color:#ffffff;
+					padding:10px;
+					
+			}
+
+			#right{
+				background:#ccc;
+				border:solid 2px #666;
+				height:800px;
+				width:395px;
+				float:right;
+			}
+
+			#registers{
+				width:395px;
+				height:300px;
+            }
+            .reg_name{
+                font-weight:bold;
+            }
+            .reg_val{
+                padding-right:50px; 
+            }
+            #addspace{
+				padding-top:20px;
+			}
+			.stackframe{
+				background:#002E63;
+				padding:5px;
+				width: 338px;
+				margin-left: auto;
+				margin-right: auto;
+			}
+			#memory{
+				width:375px;
+				height:400px;
+				background:#666;
+				margin:auto;
+			}
+			#memory #addspace{
+				height:361px;
+            }
+
+            .memrow{
+				width: 368px;
+				clear: both;
+				color: #6495ED;
+            }
+            .memadd{
+				width:100px;
+				float:left;
+            }
+            .memval{
+				width:268px;
+				float:right;
+            }
+			
+		</style>
+	</head>
+	<body>
+		<div id="container">
+			<div id="left">
+				<div id="titlebox">
+					<h1> Interactive Stack </h1>
+                </div>
+                <div id="code">
+                    <div id="c_src">
+                        <!--  ========================================================================================== -->
+                        
+							   <?php
+								$handle = fopen("Examples/test.c", "r");
+								if ($handle) {
+									while (($line = fgets($handle)) !== false) {
+										echo $line . "<br>";
+									}
+								} else {
+									// error opening the file.
+								} 
+								fclose($handle);
+							  ?>
+
+
+
+                        <!-- ============================================================================================ -->
+				    </div>
+				    <div id="asm_src">
+                        <!--  ========================================================================================== -->
+                        
+                        <!-- ============================================================================================ -->
+                    </div>
+                </div>
+				<div id="infobox">
+					<div id="comment">
+						test
+					</div>
+				</div>
+			</div>
+			<div id="right">
+				<h1> Registers </h1>
+				<div id="registers">
+                    <div class="reg_row">
+                        <table>
+                            <tr><td class="reg_name">EAX </td> <td class="reg_val"> 0xfeedface </td> <td class="reg_name">EBX </td> <td class="reg_val">0xfeedface </td>  </tr>
+                            <tr><td class="reg_name">ECX </td> <td class="reg_val"> 0xfeedface </td> <td class="reg_name">EDX </td> <td class="reg_val">0xfeedface </td>  </tr>
+                            <tr><td class="reg_name">ESI </td> <td class="reg_val"> 0xfeedface </td> <td class="reg_name">EDI </td> <td class="reg_val">0xfeedface </td>   </tr>
+                            <tr><td class="reg_name">EBP </td> <td class="reg_val"> 0xfeedface </td> <td class="reg_name">ESP </td> <td class="reg_val">0xfeedface  </td>   </tr>
+                            <tr><td class="reg_name">ESP </td> <td class="reg_val"> 0xfeedface </td><td> </td> <td> </td>   </tr>
+                        </table>
+						
+						
+				<h1> Stack </h1>
+				<div id="memory">
+					<div style="color:#f2f2f2; margin-left:auto; margin-right:auto; width:370px; text-align:center"> High Memory </span>
+					<div id="addspace">
+						
+						<div class="stackframe">
+							<div class="memrow">
+								<div class="memadd"> 0xdeadbeef  </div>
+								<div class="memval"> 00 00 00 00 </div>
+							</div>
+							<div class="memrow">
+								<div class="memadd"> 0xdeadbeef  </div>
+								<div class="memval"> 00 00 00 00 </div>
+							</div>
+							<div class="memrow">
+								<div class="memadd"> 0xdeadbeef  </div>
+								<div class="memval"> 00 00 00 00 </div>
+							</div>
+							<div class="memrow">
+								<div class="memadd"> 0xdeadbeef  </div>
+								<div class="memval"> 00 00 00 00 </div>
+							</div>
+							<div class="memrow">
+								<div class="memadd"> 0xdeadbeef  </div>
+								<div class="memval"> 00 00 00 00 </div>
+							</div>
+							<div class="memrow">
+								<div class="memadd"> 0xdeadbeef  </div>
+								<div class="memval"> 00 00 00 00 </div>
+							</div>
+							<div class="memrow">
+								<div class="memadd"> 0xdeadbeef  </div>
+								<div class="memval"> 00 00 00 00 </div>
+							</div>
+							
+							<br>
+						</div>
+                
+					</div>
+					<div style="color:#f2f2f2; margin-left:auto; margin-right:auto; width:370px; text-align:center"> Low Memory </span>
+				</div>
+				
+				
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
