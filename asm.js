@@ -39,40 +39,40 @@ var hook = {
   },
 };
 
-var register = {
-  'eax' : null,
-  'ebx' : null,
-  'ecx' : null,
-  'edx' : null,
-  'esi' : null,
-  'edi' : null,
-  'ebp' : null,
-  'esp' : null,
-  'eip' : null,
-};
-
-var flags = {
-  'OF' : 0,
-  'DF' : 0,
-  'IF' : 0,
-  'TF' : 0,
-  'SF' : 0,
-  'ZF' : 0,
-  'AF' : 0,
-  'PF' : 0,
-  'CF' : 0,
-};
-
 /**
- * ITS DA STACK YO!!1!!one!
- * obj of memory addresses.
- */
-var stack = {};
-
-/**
+ * ITS EVERYTHING YO!!1!!one!
  * "Whatever your heart desires." - Meranda
  */
-var globals = {};
+var globals = {
+  'register' : {
+    'eax' : 40,
+    'ebx' : null,
+    'ecx' : null,
+    'edx' : null,
+    'esi' : null,
+    'edi' : null,
+    'ebp' : null,
+    'esp' : null,
+    'eip' : null,
+  },
+  'flags' : {
+    'OF' : 0,
+    'DF' : 0,
+    'IF' : 0,
+    'TF' : 0,
+    'SF' : 0,
+    'ZF' : 0,
+    'AF' : 0,
+    'PF' : 0,
+    'CF' : 0,
+  },
+  'stack' : {
+    '0xdeadbeef' : '0xff',
+    '0xff00ff00' : '0x0f',
+  },
+  'bss' : {},
+  'data' : {},
+};
 
 /**
  * Push places the argument at the top of the stack.
@@ -80,7 +80,7 @@ var globals = {};
  * data string Can be int, register, memory location.
  */
 var push = function(data) {
-  register.eax = 'test';
+  globals['stack']['0xffffffff'] = getTrueData(data);
 };
 hook.register('push', push);
 
@@ -91,10 +91,19 @@ hook.register('push', push);
  * src string Can be int, register or memory location.
  */
 var mov = function(dest, src) {
-  console.log('test');
+  src = getTrueData(src);
+  type = dataType(dest);
+  switch (type) {
+    case 'register':
+      globals['register'][dest] = src;
+      break;
+    case 'stack':
+      globals['stack'][dest] = src;
+      break;
+  } 
 };
 hook.register('mov', mov);
- 
+
 /**
  * Sub takes the subtrahend and subtracts it from
  * the minuend, then stores it in minuend.
@@ -103,9 +112,57 @@ hook.register('mov', mov);
  * subtrahend string Can be int, register or memory location.
  */
 var sub = function(minuend, subtrahend) {
-  console.log('test');
+  minuendType = dataType(minuend);
+  minuendValue = getTrueData(minuend);
+  subtrahendValue = getTrueData(subtrahend);
+  subtrahendType = dataType(subtrahend);
+  if (subtrahendType == 'stack' || dataType(subtrahendValue) == 'stack') {
+    subtrahend =  parseInt(subtrahendValue, 16);
+  }
+  switch (minuendType) {
+    case 'stack':
+      globals['stack'][minuend] = "0x" + (globals['stack'][minuend] - subtrahend).toString(16);
+      break;
+    case 'register':
+      globals['register'][minuend] = "0x" + (minuendValue - subtrahend).toString(16);
+      break;
+
+  }
 };
 hook.register('sub', sub);
+
+/**
+ * Add takes the subtrahend and adds it to
+ * the minuend, then stores it in minuend.
+ *
+ * minuend string Can be register or memory location.
+ * subtrahend string Can be int, register or memory location.
+ */
+var add = function(minuend, subtrahend) {
+  minuendType = dataType(minuend);
+  minuendValue = getTrueData(minuend);
+  subtrahendValue = getTrueData(subtrahend);
+  subtrahendType = dataType(subtrahend);
+  if (subtrahendType == 'stack' || dataType(subtrahendValue) == 'stack') {
+    subtrahend =  parseInt(subtrahendValue, 16);
+  }
+  switch (minuendType) {
+    case 'stack':
+      if (dataType(globals['stack'][minuend]) == 'stack') {
+        minuendValue = parseInt(globals['stack'][minuend], 16);
+      }
+      else {
+        minuendValue = globals['stack'][minuend];
+      }
+      globals['stack'][minuend] = "0x" + (minuendValue + subtrahend).toString(16);
+      break;
+    case 'register':
+      globals['register'][minuend] = "0x" + (minuendValue + subtrahend).toString(16);
+      break;
+
+  }
+};
+hook.register('add', add);
 
 /**
  *  Figures out what data type the entry is
@@ -113,16 +170,40 @@ hook.register('sub', sub);
  *
  *  data string? either register, int, or memory location.
  */
-function data_var(data) {
-  if (data in register) {
+function dataType(data) {
+  data = data.toString();
+  if (data in globals['register']) {
     return 'register';
+  }
+  if (data.match(/^0x([0-9a-fA-F]{2}){1,}$/)) {
+    return 'stack';
+  }
+  if (data.match(/^\[0x([0-9a-fA-F]{2}){1,}\]$/)) {
+    return 'stack_by_reference';
   }
   if (data.match(/[0-9]{1,}/)) {
     return 'int';
   }
-  if (data.match(/0x[0-9a-fA-F]{7}/)) {
-    return 'stack';
-  }
   console.log(data, 'I AM ERROR');
   throw 'Could not process data see console log';
+}
+
+function getTrueData(data) {
+  var trueData = null;
+  var type = dataType(data);
+  switch(type) {
+    case 'register':
+      trueData = globals['register'][data];
+      break;
+    case 'int':
+      trueData = parseInt(data);
+      break;
+    case 'stack':
+      trueData = String(data);
+      break;
+    case 'stack_by_reference':
+      data = data.replace(/\[|\]/g, '');
+      trueData = globals['stack'][data];
+  }
+  return trueData;
 }
