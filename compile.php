@@ -1,5 +1,6 @@
 <script src="asm.js"></script>
 <script src="instruction.js"></script>
+<button onclick="javascript: nextStep();">Next()</button>
 <?php
 /**
  * @file PHP script to compile and dump a c file

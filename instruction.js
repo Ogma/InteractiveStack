@@ -26,8 +26,6 @@ for (var memory in InstructionAddress) {
 }
 
 function callInstruction(address) {
-  console.log(address, 'called address');
-  console.log(InstructionAddress[address].func, 'called func');
   var insArgs = InstructionAddress[address].args;
   insArgs.unshift(InstructionAddress[address].func);
   hook.call.apply(0, insArgs);
