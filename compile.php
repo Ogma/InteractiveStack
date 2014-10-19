@@ -1,19 +1,20 @@
 <script src="asm.js"></script>
+<script src="instruction.js"></script>
 <?php
 /**
  * @file PHP script to compile and dump a c file
  * http://pastebin.com/EsPXgDUk
  */
 
-echo process("#include <stdio.h>
-// hax
-// <script>alert('test');</script>
-int main()
-{
-    printf(\"Hello world\\n\");
-    return 0;
+// echo process("#include <stdio.h>
+// // hax
+// // <script>alert('test');</script>
+// int main()
+// {
+//     printf(\"Hello world\\n\");
+//     return 0;
 
-}");
+// }");
 
 function build_flags() {
   $name = salted_md5(time() . rand());
