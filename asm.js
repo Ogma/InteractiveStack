@@ -79,10 +79,9 @@ var globals = {
  *
  * data string Can be int, register, memory location.
  */
-var push = function(data) {
+hook.register('push', function(data) {
   globals['stack']['0xffffffff'] = getTrueData(data);
-};
-hook.register('push', push);
+});
 
 /**
  * Mov copies source data to the destination.
@@ -90,7 +89,7 @@ hook.register('push', push);
  * dest string Can be register, memory location.
  * src string Can be int, register or memory location.
  */
-var mov = function(dest, src) {
+hook.register('mov', function(dest, src) {
   src = getTrueData(src);
   type = dataType(dest);
   switch (type) {
@@ -101,8 +100,7 @@ var mov = function(dest, src) {
       globals['stack'][dest] = src;
       break;
   } 
-};
-hook.register('mov', mov);
+});
 
 /**
  * Sub takes the subtrahend and subtracts it from
@@ -111,7 +109,7 @@ hook.register('mov', mov);
  * minuend string Can be register or memory location.
  * subtrahend string Can be int, register or memory location.
  */
-var sub = function(minuend, subtrahend) {
+hook.register('sub', function(minuend, subtrahend) {
   minuendType = dataType(minuend);
   minuendValue = getTrueData(minuend);
   subtrahendValue = getTrueData(subtrahend);
@@ -126,10 +124,8 @@ var sub = function(minuend, subtrahend) {
     case 'register':
       globals['register'][minuend] = "0x" + (minuendValue - subtrahend).toString(16);
       break;
-
   }
-};
-hook.register('sub', sub);
+});
 
 /**
  * Add takes the subtrahend and adds it to
@@ -138,7 +134,7 @@ hook.register('sub', sub);
  * minuend string Can be register or memory location.
  * subtrahend string Can be int, register or memory location.
  */
-var add = function(minuend, subtrahend) {
+hook.register('add', function(minuend, subtrahend) {
   minuendType = dataType(minuend);
   minuendValue = getTrueData(minuend);
   subtrahendValue = getTrueData(subtrahend);
@@ -161,8 +157,18 @@ var add = function(minuend, subtrahend) {
       break;
 
   }
-};
-hook.register('add', add);
+});
+
+hook.register('call', function(data, moveAddr) {
+  switch (dataType(data)) {
+    case 'stack':
+      globals['register']['eip'] = data;
+      break;
+    case 'stack_by_reference':
+      globals['register']['eip'] = getTrueData(data);
+      break;
+  }
+});
 
 /**
  *  Figures out what data type the entry is
